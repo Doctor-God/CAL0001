@@ -63,15 +63,15 @@ def millerRabin(n, k):
 		a = random.randrange(2, m-1)
 		x = expMod(a, d, n)
 		if(x == 1):
-			return False
+			continue
 
 		for i in range(s-1):
 			x = expMod(a, (2**i)*d, n)
-			if(x == -1):
+			if(x != -1):
 				return False
 	return True
 
-def millerRabin4(n, k):
+def millerRabin(n, k):
 	if n == 2:
 		return True
 	if not n & 1:
@@ -159,24 +159,26 @@ def fermat(n, k):
 def createKeys(numBits):
 	
 	p = random.randrange((1 << numBits-1) + 1, 1 << numBits, 2)
-
-	while(not millerRabin(p, 1000)):
-		p = random.randrange((1 << numBits-1) + 1, 1 << numBits, 2)
-		# p += 2
+	while(not millerRabin(p, 200)):
+		# p = random.randrange((1 << numBits-1) + 1, 1 << numBits, 2)
+		p += 2
 	q = random.randrange((1 << numBits-1) + 1, 1 << numBits, 2)
 
-	while(q == p and not millerRabin(q, 1000)):
-		q = random.randrange((1 << numBits-1) + 1, 1 << numBits, 2)
-		# q += 2
+	while(q == p or not millerRabin(q, 200)):
+		# q = random.randrange((1 << numBits-1) + 1, 1 << numBits, 2)
+		q += 2
 
-	print(p)
-	print(q)
+
 
 	n = p*q
 	# n = 2139884053 #n 16 bits teste que funciona
 
 	nMenos = (p-1)*(q-1)
 	# nMenos = 2139791488 #nMenos teste que funciona
+	
+	print(p)
+	print(q)
+	print(n)
 
 	primos = crivo(1000)
 
@@ -235,3 +237,10 @@ def reconstructMessage(blocos):
 		for c in chars:
 			mensagem += str(chr(int(c)))
 	return mensagem
+
+def fatoraChave(n):
+	for i in range(3, n):
+		p, resto = divmod(n, i)
+		if(resto == 0):
+			print("Chave = " + str(p) + "*" + str(i))
+			break

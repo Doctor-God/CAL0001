@@ -30,6 +30,8 @@ def main(argv):
 
 	print("Mensagem descriptada = " + mensagemDescript)
 
+	cripto.fatoraChave(n)
+
 if __name__ == "__main__":
     main(sys.argv)
 
