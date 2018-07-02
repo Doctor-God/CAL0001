@@ -29,8 +29,7 @@ def expMod(base, e, m):
 
 def extEuclid(a, b):
 	if(b == 0):
-		tupla = [a, 1, 0]
-		return tupla
+		return a, 1, 0
 	mdc, x, y = extEuclid(b, a % b)
 	mdc, x, y = [mdc, y, x - int(a/b) * y]
 	return mdc, x, y
@@ -46,8 +45,7 @@ def invMod(a, b, n):
 	return retorno
 
 def millerRabin(n, k):
-	# if(n % 2 == 0):
-	# 	return False
+
 	m = n-1
 
 	s = 0
@@ -62,64 +60,120 @@ def millerRabin(n, k):
 
 
 	for i in range(k):
-		a = random.randint(2, m-1)
+		a = random.randrange(2, m-1)
 		x = expMod(a, d, n)
-		if(x == 1 or x == m):
-			continue
-
-		for i in range(s-1):
-			x = expMod(x, 2, n)
-			if(x == 1):
-				return False
-			if(x == m):
-				break
-		if(x != m):
-			return False
-
-	return True
-
-def millerRabin2(n, k):
-	# if(n % 2 == 0):
-	# 	return False
-	m = n-1
-
-	s = 0
-	quociente = m
-	resto = 0
-	while(resto == 0):
-		quociente, resto = divmod(quociente, 2)
-		s += 1
-	s -= 1
-	
-	d = quociente*2 + 1
-
-
-	for i in range(k):
-		a = random.randint(2, m-1)
-		x = expMod(a, d, n) 
 		if(x == 1):
-			return True
+			return False
 
 		for i in range(s-1):
 			x = expMod(a, (2**i)*d, n)
 			if(x == -1):
+				return False
+	return True
+
+def millerRabin4(n, k):
+	if n == 2:
+		return True
+	if not n & 1:
+		return False
+
+	def check(a, s, d, n):
+		x = pow(a, d, n)
+		if x == 1:
+			return True
+		for i in range(s - 1):
+			if x == n - 1:
 				return True
-	return False
+			x = pow(x, 2, n)
+		return x == n - 1
+
+	s = 0
+	d = n - 1
+
+	while d % 2 == 0:
+		d >>= 1
+		s += 1
+
+	for i in range(k):
+		a = random.randrange(2, n - 1)
+		if not check(a, s, d, n):
+			return False
+	return True
+
+
+def millerRabin2(n, k):
+    """Return True if n passes k rounds of the Miller-Rabin primality
+    test (and is probably prime). Return False if n is proved to be
+    composite.
+
+    """
+    small_primes = [2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31]
+    if n < 2: return False
+    for p in small_primes:
+        if n < p * p: return True
+        if n % p == 0: return False
+    r, s = 0, n - 1
+    while s % 2 == 0:
+        r += 1
+        s //= 2
+    for _ in range(k):
+        a = random.randrange(2, n - 1)
+        x = pow(a, s, n)
+        if x == 1 or x == n - 1:
+            continue
+        for _ in range(r - 1):
+            x = pow(x, 2, n)
+            if x == n - 1:
+                break
+        else:
+            return False
+    return True
+
+def millerRabin3(n, k):
+	r = 0
+	s = n-1
+	while(s%2 == 0):
+		r += 1
+		s //= 2
+	for i in range(k):
+		a = random.randrange(2, n-1)
+		x = expMod(a, s, n)
+		if(x == 1 or x == n-1):
+			continue
+		for j in range(r-1):
+			x = expMod(x, 2, n)
+			if(x == n - 1):
+				break
+		else:
+			return False
+	return True
+
+def fermat(n, k):
+	for i in range(k):
+		a = random.randrange(2, n-2)
+		x = expMod(a, n-1, n)
+		if(x != 1):
+			return False
+	return True
 
 def createKeys(numBits):
+	
 	p = random.randrange((1 << numBits-1) + 1, 1 << numBits, 2)
 
-	while(not millerRabin(p, 200)):
+	while(not millerRabin(p, 1000)):
 		p = random.randrange((1 << numBits-1) + 1, 1 << numBits, 2)
 		# p += 2
 	q = random.randrange((1 << numBits-1) + 1, 1 << numBits, 2)
 
-	while(not millerRabin(q, 200) and q == p):
+	while(q == p and not millerRabin(q, 1000)):
 		q = random.randrange((1 << numBits-1) + 1, 1 << numBits, 2)
 		# q += 2
 
+	print(p)
+	print(q)
+
 	n = p*q
-	# n = 2139884053 #n teste que funciona
+	# n = 2139884053 #n 16 bits teste que funciona
 
 	nMenos = (p-1)*(q-1)
 	# nMenos = 2139791488 #nMenos teste que funciona
@@ -136,8 +190,8 @@ def createKeys(numBits):
 		e = primos[i]
 		mdc, x, y = extEuclid(e, nMenos)
 
-	d = invMod(e, 1, nMenos)[0]
-	# d = tupla[1] % nMenos
+	# d = invMod(e, 1, nMenos)[0]
+	d = x % nMenos
 
 	return n, e, d
 
