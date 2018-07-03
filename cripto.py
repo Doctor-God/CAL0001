@@ -45,7 +45,6 @@ def invMod(a, b, n):
 	return retorno
 
 def millerRabin(n, k):
-
 	m = n-1
 
 	s = 0
@@ -64,121 +63,39 @@ def millerRabin(n, k):
 		x = expMod(a, d, n)
 		if(x == 1):
 			continue
-
 		for i in range(s-1):
-			x = expMod(a, (2**i)*d, n)
-			if(x != -1):
+			if(x == m):
+				break
+			x = expMod(x, 2, n)
+		else: 
+			if(x == n-1):
+				continue
+			else:
 				return False
 	return True
 
-def millerRabin(n, k):
-	if n == 2:
-		return True
-	if not n & 1:
-		return False
-
-	def check(a, s, d, n):
-		x = pow(a, d, n)
-		if x == 1:
-			return True
-		for i in range(s - 1):
-			if x == n - 1:
-				return True
-			x = pow(x, 2, n)
-		return x == n - 1
-
-	s = 0
-	d = n - 1
-
-	while d % 2 == 0:
-		d >>= 1
-		s += 1
-
-	for i in range(k):
-		a = random.randrange(2, n - 1)
-		if not check(a, s, d, n):
-			return False
-	return True
-
-
-def millerRabin2(n, k):
-    """Return True if n passes k rounds of the Miller-Rabin primality
-    test (and is probably prime). Return False if n is proved to be
-    composite.
-
-    """
-    small_primes = [2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31]
-    if n < 2: return False
-    for p in small_primes:
-        if n < p * p: return True
-        if n % p == 0: return False
-    r, s = 0, n - 1
-    while s % 2 == 0:
-        r += 1
-        s //= 2
-    for _ in range(k):
-        a = random.randrange(2, n - 1)
-        x = pow(a, s, n)
-        if x == 1 or x == n - 1:
-            continue
-        for _ in range(r - 1):
-            x = pow(x, 2, n)
-            if x == n - 1:
-                break
-        else:
-            return False
-    return True
-
-def millerRabin3(n, k):
-	r = 0
-	s = n-1
-	while(s%2 == 0):
-		r += 1
-		s //= 2
-	for i in range(k):
-		a = random.randrange(2, n-1)
-		x = expMod(a, s, n)
-		if(x == 1 or x == n-1):
-			continue
-		for j in range(r-1):
-			x = expMod(x, 2, n)
-			if(x == n - 1):
-				break
-		else:
-			return False
-	return True
-
-def fermat(n, k):
-	for i in range(k):
-		a = random.randrange(2, n-2)
-		x = expMod(a, n-1, n)
-		if(x != 1):
-			return False
-	return True
 
 def createKeys(numBits):
 	
-	p = random.randrange((1 << numBits-1) + 1, 1 << numBits, 2)
+	p = random.randrange((1 << numBits//2-1) + 1, 1 << numBits//2, 2)
 	while(not millerRabin(p, 200)):
-		# p = random.randrange((1 << numBits-1) + 1, 1 << numBits, 2)
-		p += 2
-	q = random.randrange((1 << numBits-1) + 1, 1 << numBits, 2)
+		p = random.randrange((1 << numBits//2-1) + 1, 1 << numBits//2, 2)
+		# p += 2
+	q = random.randrange((1 << numBits//2-1) + 1, 1 << numBits//2, 2)
 
 	while(q == p or not millerRabin(q, 200)):
-		# q = random.randrange((1 << numBits-1) + 1, 1 << numBits, 2)
-		q += 2
+		q = random.randrange((1 << numBits//2-1) + 1, 1 << numBits//2, 2)
+		# q += 2
 
 
 
 	n = p*q
-	# n = 2139884053 #n 16 bits teste que funciona
 
 	nMenos = (p-1)*(q-1)
-	# nMenos = 2139791488 #nMenos teste que funciona
 	
-	print(p)
-	print(q)
-	print(n)
+	print("p = " + str(p))
+	print("q = " + str(q))
+	print("n = " + str(n))
 
 	primos = crivo(1000)
 
@@ -211,17 +128,13 @@ def decrypt(cyphertext, d, n):
 		text.append(expMod(part, d, n))
 	return text
 
-def splitConvertMessage(mensagem, numChars):
+def splitConvertMessage(mensagem, bits):
+	numChars = bits//8 - 1
 	tamMensagem = len(mensagem)
 	blocosMensagem = wrap(mensagem, numChars, drop_whitespace = False)
 	blocosInt = []
-	# numBlocos = len(blocosMensagem)
-	# i = 0
 	for bloco in blocosMensagem:
-		# i += 1
 		blocosInt.append(int("".join(str(format(ord(c), '03d')) for c in bloco)))
-		# if(i == numBlocos and tamMensagem % 2 != 0):
-		# 	blocosMensagem[i-1] = "000"
 
 	return blocosInt
 

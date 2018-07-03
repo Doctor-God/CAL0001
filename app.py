@@ -3,6 +3,9 @@ import cripto
 import random as r
 
 def main(argv):
+	if(len(argv) < 2):
+		print("app.py <numbits_chave>")
+		exit(0)
 	numBits = int(argv[1])
 
 	n, e, d = cripto.createKeys(numBits)
@@ -10,7 +13,7 @@ def main(argv):
 	print("Digite a mensagem a ser enviada")
 	mensagem = input()
 
-	blocosInt = cripto.splitConvertMessage(mensagem, 2)
+	blocosInt = cripto.splitConvertMessage(mensagem, numBits)
 
 	print("Pares de caracteres como inteiro: ", end='')
 	print(blocosInt)
@@ -30,7 +33,7 @@ def main(argv):
 
 	print("Mensagem descriptada = " + mensagemDescript)
 
-	cripto.fatoraChave(n)
+	# cripto.fatoraChave(n)
 
 if __name__ == "__main__":
     main(sys.argv)
